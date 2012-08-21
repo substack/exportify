@@ -12,9 +12,15 @@ module.exports = function (files, opts) {
     var pending = files.length;
     files.forEach(function (file) {
         var ext = path.extname(file);
-        if (opts.ext && ext !== ext) return;
-        if (ext === '.js') return; // already a js file, NICE TRY
-        
+        var invalid_ext = (
+            ext === '.js' // already a js file, NICE TRY
+            || (opts.ext && ext !== opts.ext)
+        );
+        if (invalid_ext) {
+            pending -= 1;
+            return;
+        }
+
         var rs = fs.createReadStream(file);
         rs.on('error', emitter.emit.bind(emitter, 'error'));
         var ws = fs.createWriteStream(file + '.js');

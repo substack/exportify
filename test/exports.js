@@ -41,3 +41,26 @@ test('package up some files', function (t) {
         });
     });
 });
+
+test('target a single extension', function (t) {
+    t.plan(3);
+    
+    var files = [ 'a.txt', 'c.foo' ]
+        .map(function (file) { return __dirname + '/files/' + file })
+    ;
+    var ex = exportify(files, {
+        ext: 'txt'
+    });
+    
+    var exported = [];
+    ex.on('export', function (file) {
+        exported.push(file);
+    });
+    ex.on('end', function () {
+        process.nextTick(function () {
+            t.ok(exported.length === 1);
+            t.ok(existsSync(__dirname + '/files/a.txt.js'));
+            t.ok(!existsSync(__dirname + '/files/c.foo.js'));
+        });
+    });
+});
