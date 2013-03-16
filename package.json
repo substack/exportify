@@ -1,6 +1,6 @@
 {
     "name" : "exportify",
-    "version" : "0.0.1",
+    "version" : "0.1.0",
     "description" : "generate require()-able javascript files from non-javascript files",
     "main" : "index.js",
     "bin" : {
