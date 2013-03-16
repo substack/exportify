@@ -2,12 +2,15 @@ var fs = require('fs');
 var path = require('path');
 var EventEmitter = require('events').EventEmitter;
 
+function _resolve(path) { return path + '.js'; }
+
 module.exports = function (files, opts) {
     if (!opts) opts = {};
     if (!files) files = [];
     if (!Array.isArray(files)) files = [ files ];
     if (opts.ext && !/^\./.test(opts.ext)) opts.ext = '.' + opts.ext;
     var emitter = new EventEmitter;
+    var resolve = opts.resolve || _resolve
     
     var pending = files.length;
     files.forEach(function (file) {
@@ -22,8 +25,9 @@ module.exports = function (files, opts) {
         }
 
         var rs = fs.createReadStream(file);
+        var dest = resolve(file);
         rs.on('error', emitter.emit.bind(emitter, 'error'));
-        var ws = fs.createWriteStream(file + '.js');
+        var ws = fs.createWriteStream(dest);
         ws.on('error', emitter.emit.bind(emitter, 'error'));
         
         ws.write('module.exports="');
@@ -33,7 +37,7 @@ module.exports = function (files, opts) {
         });
         rs.on('end', function () {
             ws.end('"\n');
-            emitter.emit('export', file);
+            emitter.emit('export', file, dest);
             if (--pending === 0) emitter.emit('end');
         });
     });
